@@ -1,9 +1,8 @@
-
 trigger:
 - master
 
 pool:
-  vmImage: my-vms
+  name: my-vms  
 
 steps:
 - script: echo Hello, world!
