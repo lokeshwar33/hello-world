@@ -1,19 +1,34 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
 - master
 
 pool:
   name: my-vms
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+  imageName: frontend-app
+  tag: $(Build.BuildId)
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+- stage: Build
+  displayName: 'Build and Push to Nexus'
+  jobs:
+  - job: DockerBuild
+    steps:
+    - task: Docker@2
+      displayName: 'Build Docker image'
+      inputs:
+        containerRegistry: NexusDockerRegistry
+        repository: $(imageName)
+        command: build
+        Dockerfile: Frontend/Dockerfile
+        tags: |
+          $(tag)
+
+    - task: Docker@2
+      displayName: 'Push Docker image to Nexus'
+      inputs:
+        containerRegistry: NexusDockerRegistry
+        repository: $(imageName)
+        command: push
+        tags: |
+          $(tag)
