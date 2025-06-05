@@ -6,7 +6,11 @@ pool:
 
 variables:
   imageName: frontend-app
-  tag: $(Build.BuildId)
+  shortCommit: $[format('{0}', variables['Build.SourceVersion'].Substring(0, 7))]
+  year: $[format('{0:yyyy}', pipeline.startTime)]
+  month: $[format('{0:MM}', pipeline.startTime)]
+  day: $[format('{0:dd}', pipeline.startTime)]
+  tag: dev-$(shortCommit)-$(year)-$(month)-$(day)-$(Build.BuildId)
 
 stages:
 - stage: Build
