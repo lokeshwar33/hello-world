@@ -25,7 +25,7 @@ stages:
         echo "##vso[task.setvariable variable=customTag]$tag"
         echo "##[endgroup]"
       displayName: 'Generate Custom Tag'
-      shell: bash
+      shell: bash   # ✅ Correct location
 
     - task: Docker@2
       displayName: 'Build Docker image'
