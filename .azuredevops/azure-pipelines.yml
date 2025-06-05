@@ -6,18 +6,27 @@ pool:
 
 variables:
   imageName: frontend-app
-  shortCommit: $[format('{0}', variables['Build.SourceVersion'].Substring(0, 7))]
-  year: $[format('{0:yyyy}', pipeline.startTime)]
-  month: $[format('{0:MM}', pipeline.startTime)]
-  day: $[format('{0:dd}', pipeline.startTime)]
-  tag: dev-$(shortCommit)-$(year)-$(month)-$(day)-$(Build.BuildId)
 
 stages:
 - stage: Build
   displayName: 'Build and Push to Nexus'
   jobs:
   - job: DockerBuild
+    displayName: 'Build and Push Image'
     steps:
+
+    - checkout: self
+
+    - script: |
+        echo "##[group]Generating Docker tag..."
+        shortCommit=$(echo $(Build.SourceVersion) | cut -c1-7)
+        tag="dev-${shortCommit}-$(date +%Y-%m-%d)-$(Build.BuildId)"
+        echo "Generated tag: $tag"
+        echo "##vso[task.setvariable variable=customTag]$tag"
+        echo "##[endgroup]"
+      displayName: 'Generate Custom Tag'
+      shell: bash
+
     - task: Docker@2
       displayName: 'Build Docker image'
       inputs:
@@ -26,7 +35,7 @@ stages:
         command: build
         Dockerfile: Frontend/Dockerfile
         tags: |
-          $(tag)
+          $(customTag)
 
     - task: Docker@2
       displayName: 'Push Docker image to Nexus'
@@ -35,4 +44,4 @@ stages:
         repository: $(imageName)
         command: push
         tags: |
-          $(tag)
+          $(customTag)
