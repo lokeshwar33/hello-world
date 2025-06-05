@@ -12,23 +12,19 @@ stages:
   displayName: 'Build and Push to Nexus'
   jobs:
   - job: DockerBuild
-    displayName: 'Build and Push Image'
+    displayName: 'Build and Push Docker Image'
     steps:
 
     - checkout: self
 
     - script: |
-        echo "##[group]Generating Docker tag..."
         shortCommit=$(echo $(Build.SourceVersion) | cut -c1-7)
         tag="dev-${shortCommit}-$(date +%Y-%m-%d)-$(Build.BuildId)"
-        echo "Generated tag: $tag"
         echo "##vso[task.setvariable variable=customTag]$tag"
-        echo "##[endgroup]"
-      displayName: 'Generate Custom Tag'
-      shell: bash   # ✅ Correct location
+      displayName: 'Generate Docker Tag'
 
     - task: Docker@2
-      displayName: 'Build Docker image'
+      displayName: 'Build Docker Image'
       inputs:
         containerRegistry: NexusDockerRegistry
         repository: $(imageName)
@@ -38,7 +34,7 @@ stages:
           $(customTag)
 
     - task: Docker@2
-      displayName: 'Push Docker image to Nexus'
+      displayName: 'Push Docker Image'
       inputs:
         containerRegistry: NexusDockerRegistry
         repository: $(imageName)
